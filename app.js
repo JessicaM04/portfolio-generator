@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { writeFile, copyFile } = require('./utils/generate-site.js');
 const inquirer = require('inquirer');
 const generatePage = require('./src/page-template');
 
@@ -22,7 +22,7 @@ const promptUser = () => {
       name: 'github',
       message: 'Enter your GitHub Username (Required)',
       validate: githubInput => {
-        if (gitbhuInput) {
+        if (githubInput) {
           return true;
         } else {
           console.log('Please enter your GitHub username!');
@@ -45,7 +45,7 @@ const promptUser = () => {
   ]);
 };
 
-const prompProject = portfolioData => {
+const promptProject = portfolioData => {
   console.log(`
   ===================
   Add a New Project
@@ -93,7 +93,7 @@ if (!portfolioData.projects) {
     {
       type: 'input',
       name: 'link',
-      message: 'Enter the GitHub loink to your project. (Required)',
+      message: 'Enter the GitHub link to your project. (Required)',
       validate: linkInput => {
         if (linkInput) {
           return true
@@ -128,11 +128,18 @@ if (!portfolioData.projects) {
 promptUser()
   .then(promptProject)
   .then(portfolioData => {
-    const pageHTML = generatePage(portfolioData);
-
-    fs.writeFile('./index.html', pageHTML, err => {
-      if (err) throw new Error(err);
-
-      console.log('Page created! Check out index.html in this directory to see it!');
-    });
+    return generatePage(portfolioData);
+  })
+  .then(pageHTML => {
+    return writeFile(pageHTML);
+  })
+  .then(writeFileResponse => {
+    console.log(writeFileResponse);
+    return copyFile();
+  })
+  .then(copyFileResponse => {
+    console.log(copyFileResponse);
+  })
+  .catch(err => {
+    console.log(err);
   });
